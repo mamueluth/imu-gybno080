@@ -25,7 +25,7 @@ constexpr uint8_t FP = 4;
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(230400);
   while (!Serial)
   {
   };
