@@ -1,5 +1,6 @@
 #include "ICM_20948.h" 
 
+#include "imu_data_serialization.h"
 #include "print_formatted.hpp"
 
 //#define USE_SPI       // Uncomment this to use SPI
@@ -68,7 +69,16 @@ void loop()
   {
     myICM.getAGMT();         // The values are only updated when you call 'getAGMT'
                              //    printRawAGMT( myICM.agmt );     // Uncomment this to see the raw values, taken directly from the agmt structure
-    printScaledAGMT(Serial, &myICM, FP, FA); // This function takes into account the scale settings from when the measurement was made to calculate the values with unit
+    //printScaledAGMT(Serial, &myICM, FP, FA); // This function takes into account the scale settings from when the measurement was made to calculate the values with unit
+    IMUDataSerialization imu_data = IMUDataSerialization(myICM);
+    size_t json_buf_size = imu_data.json_buffer_size();
+    char json_buffer[json_buf_size];
+    if (!imu_data.serialize_to_json(json_buffer, json_buf_size))
+    {
+      Serial.println("IMU data serialization failed: buffer too small");
+      return;
+    }
+    Serial.println(json_buffer); // Print the data in JSON format
   }
   else
   {
