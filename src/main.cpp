@@ -1,8 +1,8 @@
 #include "ICM_20948.h" 
 
-//#define USE_SPI       // Uncomment this to use SPI
+#include "print_formatted.hpp"
 
-#define SERIAL_PORT Serial
+//#define USE_SPI       // Uncomment this to use SPI
 
 #define SPI_PORT SPI // Your desired SPI port.       Used only when "USE_SPI" is defined
 #define CS_PIN 2     // Which pin you connect CS to. Used only when "USE_SPI" is defined
@@ -19,15 +19,13 @@ ICM_20948_I2C myICM; // Otherwise create an ICM_20948_I2C object
 #endif
 
 // forward declaration of the printScaledAGMT function
-template <typename CommunicationProtocol> void printScaledAGMT(CommunicationProtocol *sensor);
-const uint8_t float_allignment = 5;
-const uint8_t float_precision = 4;
+constexpr uint8_t FA = 5;
+constexpr uint8_t FP = 4;
 
 void setup()
 {
-
-  SERIAL_PORT.begin(115200);
-  while (!SERIAL_PORT)
+  Serial.begin(115200);
+  while (!Serial)
   {
   };
 
@@ -50,11 +48,10 @@ void setup()
     myICM.begin(WIRE_PORT, AD0_VAL);
 #endif
 
-    SERIAL_PORT.print(F("Initialization of the sensor returned: "));
-    SERIAL_PORT.println(myICM.statusString());
+    Serial.print(F("Initialization of the sensor returned: ")); Serial.println(myICM.statusString());
     if (myICM.status != ICM_20948_Stat_Ok)
     {
-      SERIAL_PORT.println("Trying again...");
+      Serial.println("Trying again...");
       delay(1000);
     }
     else
@@ -71,78 +68,11 @@ void loop()
   {
     myICM.getAGMT();         // The values are only updated when you call 'getAGMT'
                              //    printRawAGMT( myICM.agmt );     // Uncomment this to see the raw values, taken directly from the agmt structure
-    printScaledAGMT(&myICM); // This function takes into account the scale settings from when the measurement was made to calculate the values with units
+    printScaledAGMT(Serial, &myICM, FP, FA); // This function takes into account the scale settings from when the measurement was made to calculate the values with unit
   }
   else
   {
-    SERIAL_PORT.println("Waiting for data");
+    Serial.println("Waiting for data");
     delay(1);
   }
-}
-
-void printFormattedFloat(float val, uint8_t leading, uint8_t decimals)
-{
-  float aval = abs(val);
-  if (val < 0)
-  {
-    SERIAL_PORT.print("-");
-  }
-  else
-  {
-    SERIAL_PORT.print(" ");
-  }
-  for (uint8_t indi = 0; indi < leading; indi++)
-  {
-    uint32_t tenpow = 0;
-    if (indi < (leading - 1))
-    {
-      tenpow = 1;
-    }
-    for (uint8_t c = 0; c < (leading - 1 - indi); c++)
-    {
-      tenpow *= 10;
-    }
-    if (aval < tenpow)
-    {
-      SERIAL_PORT.print("0");
-    }
-    else
-    {
-      break;
-    }
-  }
-  if (val < 0)
-  {
-    SERIAL_PORT.print(-val, decimals);
-  }
-  else
-  {
-    SERIAL_PORT.print(val, decimals);
-  }
-}
-
-template <typename CommunicationProtocol> void printScaledAGMT(CommunicationProtocol *sensor)
-{
-  SERIAL_PORT.print("Scaled. Acc (mg) [ ");
-  printFormattedFloat(sensor->accX(), float_allignment, float_precision);
-  SERIAL_PORT.print(", ");
-  printFormattedFloat(sensor->accY(), float_allignment, float_precision);
-  SERIAL_PORT.print(", ");
-  printFormattedFloat(sensor->accZ(), float_allignment, float_precision);
-  SERIAL_PORT.print(" ], Gyr (DPS) [ ");
-  printFormattedFloat(sensor->gyrX(), float_allignment, float_precision);
-  SERIAL_PORT.print(", ");
-  printFormattedFloat(sensor->gyrY(), float_allignment, float_precision);
-  SERIAL_PORT.print(", ");
-  printFormattedFloat(sensor->gyrZ(), float_allignment, float_precision);
-  SERIAL_PORT.print(" ], Mag (uT) [ ");
-  printFormattedFloat(sensor->magX(), float_allignment, float_precision);
-  SERIAL_PORT.print(", ");
-  printFormattedFloat(sensor->magY(), float_allignment, float_precision);
-  SERIAL_PORT.print(", ");
-  printFormattedFloat(sensor->magZ(), float_allignment, float_precision);
-  SERIAL_PORT.print(" ], Tmp (C) [ ");
-  printFormattedFloat(sensor->temp(), float_allignment, float_precision);
-  SERIAL_PORT.print(" ]");
-  SERIAL_PORT.println();
 }
