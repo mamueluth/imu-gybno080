@@ -37,3 +37,10 @@ From within your build folder (`~/workspace/src/imu-gybno080/tools/measure_frequ
 ```bash
 ./measure_serial_freq
 ```
+Note however, that the port and baud rate are currently hardcoded as:
+```cpp
+// Open and configure serial port
+serial_port.Open("/dev/ttyUSB0");
+serial_port.SetBaudRate(LibSerial::BaudRate::BAUD_230400);
+```
+You can check [https://github.com/crayzeewulf/libserial/blob/master/src/libserial/SerialPortConstants.h](https://github.com/crayzeewulf/libserial/blob/master/src/libserial/SerialPortConstants.h) for available baud rates. Don't forget to update the baud rates ind [main.cpp](../src/main.cpp) and [platformio.ini](../platformio.ini) 
