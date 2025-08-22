@@ -13,7 +13,7 @@ pip install -r requirements.txt
 python3 visualize.py
 ```
 
-# Measure
+# Measure IMU Update Frequency
 
 ## Setup Instructions communication frequency measurement
 Make sure `libserial-dev` is installed. e.g. with
@@ -25,11 +25,15 @@ $ apt list libserial-dev
 If not install with `sudo apt install libserial-dev`.
 
 ### Build
+Change to `measure_frequency` folder. If there is no build folder create one with: `mkdir build`. After you create the build folder change into it and run:
 ```bash
-g++ serial_freq.cpp -o serial_freq -lserial -std=c++17
+cmake ..
+make
 ```
+there should now be a executable called `measure_serial_freq`.
 
-### Run 
+### Run
+From within your build folder (`~/workspace/src/imu-gybno080/tools/measure_frequency/build`) run: 
 ```bash
-./serial_freq
+./measure_serial_freq
 ```
